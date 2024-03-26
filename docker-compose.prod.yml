@@ -1,5 +1,15 @@
 version: '3.8'
 services:
+  indexer:
+    build: ./
+    restart: always
+    environment:
+      DB: postgres://root:password@db:5432/breadchain-indexer
+      PORT: 8000
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
   db:
     image: postgres:latest
     restart: always
@@ -29,5 +39,4 @@ services:
 
 volumes:
   caddy_data:
-    external: true
   caddy_config:

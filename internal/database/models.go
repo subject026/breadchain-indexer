@@ -18,6 +18,20 @@ type Project struct {
 	WalletAddress string
 }
 
+type Slice struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	StartedAt time.Time
+}
+
+type SliceProject struct {
+	ID        uuid.UUID
+	CreatedAt time.Time
+	ProjectID uuid.UUID
+	SliceID   uuid.UUID
+	Value     int32
+}
+
 type User struct {
 	ID            uuid.UUID
 	CreatedAt     time.Time

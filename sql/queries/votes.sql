@@ -8,7 +8,7 @@ RETURNING *;
 SELECT * FROM votes;
 
 -- name: GetVotesInRange :many
-SELECT * FROM votes WHERE created_at > $1 AND created_at < $2;
+SELECT * FROM votes WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC;
 
 -- name: GetVotesInRangeForUser :many
-SELECT * FROM votes WHERE user_id = $1 AND created_at > $2 AND created_at < $3;
+SELECT * FROM votes WHERE user_id = $1 AND created_at > $2 AND created_at < $3 ORDER BY created_at DESC;

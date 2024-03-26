@@ -12,32 +12,44 @@ import (
 	"github.com/subject026/breadchain-indexer/internal/database"
 )
 
+type VoterState struct {
+	Projects []database.Project
+	Users    []database.User
+}
+
 func startVoter(DB *database.Queries) {
 
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	mainCtx := context.Background()
 
-	stamp := time.Now()
+	lastVote := time.Now()
 
-	// scheduler.Every(1).Minute().WaitForSchedule().Do(func() {
-	// 	votes, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
-	// 		CreatedAt:   stamp,
-	// 		CreatedAt_2: time.Now(),
-	// 	})
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 		return
-	// 	}
+	scheduler.Every(10).Seconds().WaitForSchedule().Do(func() {
+		_, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
+			CreatedAt:   lastVote,
+			CreatedAt_2: time.Now(),
+		})
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
-	// 	// diff := time.Now().Sub(stamp)
+		fmt.Println("lastVote: ", lastVote)
 
-	// 	stamp = time.Now()
+		DB.CreateSlice(mainCtx, database.CreateSliceParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			StartedAt: lastVote,
+		})
 
-	// })
+		// diff := time.Now().Sub(stamp)
+
+		lastVote = time.Now()
+
+	})
 
 	scheduler.Every(1).Second().WaitForSchedule().Do(func() {
-		fmt.Println("..........................................................")
 		projects, err := DB.GetProjects(mainCtx)
 		if err != nil {
 			log.Fatal(err)
@@ -50,13 +62,13 @@ func startVoter(DB *database.Queries) {
 			return
 		}
 
-		fmt.Println(("stamp: "), time.Since(stamp))
+		fmt.Println(("lastVote: "), lastVote)
 
 		for _, user := range users {
 			// find user that hasn't voted yet
 			votes, err := DB.GetVotesInRangeForUser(mainCtx, database.GetVotesInRangeForUserParams{
 				UserID:      user.ID,
-				CreatedAt:   time.Now(),
+				CreatedAt:   lastVote,
 				CreatedAt_2: time.Now(),
 			})
 			if err != nil {
@@ -67,9 +79,6 @@ func startVoter(DB *database.Queries) {
 				continue
 			}
 
-			// fmt.Println("***************************")
-			// fmt.Println("len votes: ", len(votes))
-			// fmt.Println("we have a voter!!")
 			votesCast := 0
 
 			for i, project := range projects {
@@ -109,3 +118,21 @@ func startVoter(DB *database.Queries) {
 func generateValue(pointsRemaining uint32) int32 {
 	return (int32(rand.Float64() * float64(pointsRemaining)))
 }
+
+// func roundToFullMinute(fullTime time.Time) {
+// 	fmt.Println("Original time:", fullTime)
+
+// 	// Round to nearest minute
+// 	seconds := fullTime.Second()
+// 	nanoseconds := fullTime.Nanosecond()
+// 	var round time.Duration
+// 	if seconds < 30 {
+// 		// Round down
+// 		round = time.Duration(-seconds)*time.Second - time.Duration(nanoseconds)*time.Nanosecond
+// 	} else {
+// 		// Round up
+// 		round = time.Duration(60-seconds)*time.Second - time.Duration(nanoseconds)*time.Nanosecond
+// 	}
+// 	roundedTime := time.Add(round)
+// 	fmt.Println("Rounded time:", roundedTime)
+// }

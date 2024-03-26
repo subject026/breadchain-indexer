@@ -21,6 +21,21 @@ CREATE TABLE votes (
     value INT NOT NULL
 );
 
+CREATE TABLE slices (
+    id UUID PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL,
+    started_at TIMESTAMP NOT NULL
+    
+);
+
+CREATE TABLE slice_projects (
+    id UUID PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL,
+    project_id UUID NOT NULL REFERENCES projects(id),
+    slice_id UUID NOT NULL REFERENCES slices(id),
+    value INT NOT NULL
+);
+
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0x09750ad360fdb7a2ee23669c4503c974d86d8694');
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0xc915eC7f4CFD1C0A8Aba090F03BfaAb588aEF9B4');
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0x7F85A82a2da50540412F6E526F1D00A0690a77B8');
@@ -40,3 +55,5 @@ INSERT INTO projects (id, created_at, updated_at, name) VALUES (uuid_in(md5(rand
 DROP TABLE users CASCADE;
 DROP TABLE projects CASCADE;
 DROP TABLE votes CASCADE;
+DROP TABLE slices CASCADE;
+DROP TABLE slice_projects CASCADE;

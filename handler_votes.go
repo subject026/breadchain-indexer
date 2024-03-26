@@ -53,8 +53,15 @@ func (apiCfg *apiConfig) handlerCreateVote(w http.ResponseWriter, r *http.Reques
 }
 
 func (apiCfg apiConfig) handlerGetVotes(w http.ResponseWriter, r *http.Request) {
+	lastSlice, err := apiCfg.DB.GetLastSlice(r.Context())
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	dbVotes, err := apiCfg.DB.GetVotesInRange(r.Context(), database.GetVotesInRangeParams{
-		CreatedAt:   time.Now().Add(-time.Second * 20),
+		CreatedAt:   lastSlice.CreatedAt,
 		CreatedAt_2: time.Now(),
 	})
 

@@ -80,7 +80,7 @@ func (q *Queries) GetVotes(ctx context.Context) ([]Vote, error) {
 }
 
 const getVotesInRange = `-- name: GetVotesInRange :many
-SELECT id, created_at, user_id, project_id, value FROM votes WHERE created_at > $1 AND created_at < $2
+SELECT id, created_at, user_id, project_id, value FROM votes WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC
 `
 
 type GetVotesInRangeParams struct {
@@ -118,7 +118,7 @@ func (q *Queries) GetVotesInRange(ctx context.Context, arg GetVotesInRangeParams
 }
 
 const getVotesInRangeForUser = `-- name: GetVotesInRangeForUser :many
-SELECT id, created_at, user_id, project_id, value FROM votes WHERE user_id = $1 AND created_at > $2 AND created_at < $3
+SELECT id, created_at, user_id, project_id, value FROM votes WHERE user_id = $1 AND created_at > $2 AND created_at < $3 ORDER BY created_at DESC
 `
 
 type GetVotesInRangeForUserParams struct {
