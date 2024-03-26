@@ -20,21 +20,21 @@ func startVoter(DB *database.Queries) {
 
 	stamp := time.Now()
 
-	scheduler.Every(1).Minute().WaitForSchedule().Do(func() {
-		votes, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
-			CreatedAt:   stamp,
-			CreatedAt_2: time.Now(),
-		})
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
+	// scheduler.Every(1).Minute().WaitForSchedule().Do(func() {
+	// 	votes, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
+	// 		CreatedAt:   stamp,
+	// 		CreatedAt_2: time.Now(),
+	// 	})
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 		return
+	// 	}
 
-		// diff := time.Now().Sub(stamp)
+	// 	// diff := time.Now().Sub(stamp)
 
-		stamp = time.Now()
+	// 	stamp = time.Now()
 
-	})
+	// })
 
 	scheduler.Every(1).Second().WaitForSchedule().Do(func() {
 		fmt.Println("..........................................................")
