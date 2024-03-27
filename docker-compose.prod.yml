@@ -1,16 +1,16 @@
 
 version: '3.8'
 services:
-  indexer:
-    build: ./
-    restart: always
-    environment:
-      DB_URL: postgres://root:password@indexer_db:5432/breadchain_indexer?sslmode=disable
-      PORT: 8000
-    depends_on:
-      - indexer_db
-    ports:
-      - 8000:8000
+  # indexer:
+  #   build: ./
+  #   restart: always
+  #   environment:
+  #     DB_URL: postgres://root:password@indexer_db:5432/breadchain_indexer?sslmode=disable
+  #     PORT: 8000
+  #   depends_on:
+  #     - indexer_db
+  #   ports:
+  #     - 8000:8000
 
   indexer_db:
     image: postgres:latest
