@@ -2,12 +2,10 @@ FROM golang:1.22.1
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+COPY . .
 
 RUN go mod download
 
-COPY . ./
+RUN go build -o ./build/indexer
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /breadchain-indexer
-
-CMD ["/breadchain-indexer"]
+CMD ./build/indexer
