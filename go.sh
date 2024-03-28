@@ -1,3 +1,4 @@
 # !/bin/bash
 
-docker compose -f docker-compose.prod.yml up -d
+docker build . -t indexer
+docker run --rm indexer
