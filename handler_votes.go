@@ -53,17 +53,15 @@ func (apiCfg *apiConfig) handlerCreateVote(w http.ResponseWriter, r *http.Reques
 }
 
 func (apiCfg apiConfig) handlerGetVotes(w http.ResponseWriter, r *http.Request) {
-	lastSlice, err := apiCfg.DB.GetLastSlice(r.Context())
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
+
+	searchFrom := getLastSliceSearchFrom(r, apiCfg)
 
 	dbVotes, err := apiCfg.DB.GetVotesInRange(r.Context(), database.GetVotesInRangeParams{
-		CreatedAt:   lastSlice.CreatedAt,
+		CreatedAt:   searchFrom,
 		CreatedAt_2: time.Now(),
 	})
+
+	fmt.Println("db votes: ", dbVotes)
 
 	if err != nil {
 		log.Println(err)
@@ -71,4 +69,15 @@ func (apiCfg apiConfig) handlerGetVotes(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	respondWithJSON(w, http.StatusOK, databaseVotesToVotes(dbVotes))
+}
+
+func getLastSliceSearchFrom(r *http.Request, apiCfg apiConfig) time.Time {
+	lastSlice, err := apiCfg.DB.GetLastSlice(r.Context())
+	if err != nil {
+		fmt.Println("no lastSlice yet ")
+		return time.Now().AddDate(-10, 0, 0)
+		// return time.Time{}, err
+	}
+	fmt.Println("we have lastSlice: ", lastSlice)
+	return lastSlice.CreatedAt
 }

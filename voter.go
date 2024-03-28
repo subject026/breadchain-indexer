@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -19,35 +21,35 @@ type VoterState struct {
 
 func startVoter(DB *database.Queries) {
 
+	VOTE_INTERVAL := os.Getenv("VOTE_INTERVAL")
+	if VOTE_INTERVAL == "" {
+		log.Fatal("VOTE_INTERVAL environment variable not set")
+	}
+
+	SLICE_INTERVAL := os.Getenv("SLICE_INTERVAL")
+	if SLICE_INTERVAL == "" {
+		log.Fatal("SLICE_INTERVAl environment variable not set")
+	}
+
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	mainCtx := context.Background()
 
 	lastVote := time.Now()
 
-	scheduler.Every(25).Seconds().WaitForSchedule().Do(func() {
-		_, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
-			CreatedAt:   lastVote,
-			CreatedAt_2: time.Now(),
-		})
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
+	voteInterval, err := strconv.ParseInt(VOTE_INTERVAL, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		fmt.Println("lastVote: ", lastVote)
+	sliceInterval, err := strconv.ParseInt(SLICE_INTERVAL, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		DB.CreateSlice(mainCtx, database.CreateSliceParams{
-			ID:        uuid.New(),
-			CreatedAt: time.Now(),
-			StartedAt: lastVote,
-		})
-
-		lastVote = time.Now()
-
-	})
-
-	scheduler.Every(1).Second().WaitForSchedule().Do(func() {
+	// voters
+	scheduler.Every(int(voteInterval)).Second().WaitForSchedule().Do(func() {
+		fmt.Println("voter running job!")
 		projects, err := DB.GetProjects(mainCtx)
 		if err != nil {
 			log.Fatal(err)
@@ -109,27 +111,32 @@ func startVoter(DB *database.Queries) {
 		}
 	})
 
+	// slicer
+	scheduler.Every(int(sliceInterval)).Seconds().WaitForSchedule().Do(func() {
+		_, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
+			CreatedAt:   lastVote,
+			CreatedAt_2: time.Now(),
+		})
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		fmt.Println("lastVote: ", lastVote)
+
+		DB.CreateSlice(mainCtx, database.CreateSliceParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			StartedAt: lastVote,
+		})
+
+		lastVote = time.Now()
+
+	})
+
 	scheduler.StartAsync()
 }
 
 func generateValue(pointsRemaining uint32) int32 {
 	return (int32(rand.Float64() * float64(pointsRemaining)))
 }
-
-// func roundToFullMinute(fullTime time.Time) {
-// 	fmt.Println("Original time:", fullTime)
-
-// 	// Round to nearest minute
-// 	seconds := fullTime.Second()
-// 	nanoseconds := fullTime.Nanosecond()
-// 	var round time.Duration
-// 	if seconds < 30 {
-// 		// Round down
-// 		round = time.Duration(-seconds)*time.Second - time.Duration(nanoseconds)*time.Nanosecond
-// 	} else {
-// 		// Round up
-// 		round = time.Duration(60-seconds)*time.Second - time.Duration(nanoseconds)*time.Nanosecond
-// 	}
-// 	roundedTime := time.Add(round)
-// 	fmt.Println("Rounded time:", roundedTime)
-// }
