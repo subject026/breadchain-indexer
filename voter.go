@@ -25,7 +25,7 @@ func startVoter(DB *database.Queries) {
 
 	lastVote := time.Now()
 
-	scheduler.Every(10).Seconds().WaitForSchedule().Do(func() {
+	scheduler.Every(25).Seconds().WaitForSchedule().Do(func() {
 		_, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
 			CreatedAt:   lastVote,
 			CreatedAt_2: time.Now(),
@@ -42,8 +42,6 @@ func startVoter(DB *database.Queries) {
 			CreatedAt: time.Now(),
 			StartedAt: lastVote,
 		})
-
-		// diff := time.Now().Sub(stamp)
 
 		lastVote = time.Now()
 
@@ -78,7 +76,6 @@ func startVoter(DB *database.Queries) {
 			if len(votes) > 0 {
 				continue
 			}
-
 			votesCast := 0
 
 			for i, project := range projects {
