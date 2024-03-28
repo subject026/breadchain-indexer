@@ -49,7 +49,6 @@ func startVoter(DB *database.Queries) {
 
 	// voters
 	scheduler.Every(int(voteInterval)).Second().WaitForSchedule().Do(func() {
-		fmt.Println("voter running job!")
 		projects, err := DB.GetProjects(mainCtx)
 		if err != nil {
 			log.Fatal(err)
@@ -61,8 +60,6 @@ func startVoter(DB *database.Queries) {
 			log.Fatal(err)
 			return
 		}
-
-		fmt.Println(("lastVote: "), lastVote)
 
 		for _, user := range users {
 			// find user that hasn't voted yet
@@ -92,8 +89,6 @@ func startVoter(DB *database.Queries) {
 
 				votesCast += int(value)
 
-				fmt.Println(project.Name, " : ", value)
-
 				_, voteErr := DB.CreateVote(mainCtx, database.CreateVoteParams{
 					ID:        uuid.New(),
 					CreatedAt: time.Now(),
@@ -113,7 +108,13 @@ func startVoter(DB *database.Queries) {
 
 	// slicer
 	scheduler.Every(int(sliceInterval)).Seconds().WaitForSchedule().Do(func() {
-		_, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
+		projects, err := DB.GetProjects(mainCtx)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		votes, err := DB.GetVotesInRange(mainCtx, database.GetVotesInRangeParams{
 			CreatedAt:   lastVote,
 			CreatedAt_2: time.Now(),
 		})
@@ -122,13 +123,46 @@ func startVoter(DB *database.Queries) {
 			return
 		}
 
-		fmt.Println("lastVote: ", lastVote)
-
-		DB.CreateSlice(mainCtx, database.CreateSliceParams{
+		fmt.Println("Creating slice...")
+		slice, err := DB.CreateSlice(mainCtx, database.CreateSliceParams{
 			ID:        uuid.New(),
 			CreatedAt: time.Now(),
 			StartedAt: lastVote,
 		})
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		fmt.Println("Slice created!!!: ", slice.ID)
+
+		for _, project := range projects {
+			projectVotes := filter(votes, func(vote database.Vote) bool {
+				return vote.ProjectID == project.ID
+			})
+
+			fmt.Println("projectVotes: ", projectVotes)
+			value := int32(0)
+
+			for _, vote := range projectVotes {
+				value += vote.Value
+			}
+
+			fmt.Println("vote count: ", value)
+
+			sliceProject, err := DB.CreateSliceProject(mainCtx, database.CreateSliceProjectParams{
+				ID:        uuid.New(),
+				CreatedAt: time.Now(),
+				SliceID:   slice.ID,
+				ProjectID: project.ID,
+				Value:     value,
+			})
+			if err != nil {
+				log.Fatal(err)
+				return
+			}
+			fmt.Println("created sliceProject: ", sliceProject.ID)
+		}
 
 		lastVote = time.Now()
 
@@ -139,4 +173,13 @@ func startVoter(DB *database.Queries) {
 
 func generateValue(pointsRemaining uint32) int32 {
 	return (int32(rand.Float64() * float64(pointsRemaining)))
+}
+
+func filter[T any](ss []T, test func(T) bool) (ret []T) {
+	for _, s := range ss {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return
 }

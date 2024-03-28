@@ -84,3 +84,61 @@ func databaseProjectsToProjects(dbProjects []database.Project) []Project {
 	}
 	return projects
 }
+
+type Slice struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	StartedAt time.Time `json:"started_at"`
+}
+
+func databaseSliceToSlice(dbSlice database.Slice) Slice {
+	return Slice{
+		ID:        dbSlice.ID,
+		CreatedAt: dbSlice.CreatedAt,
+		StartedAt: dbSlice.StartedAt,
+	}
+}
+
+func databaseSlicesToSlices(dbSlices []database.GetSlicesRow) []Slice {
+	slices := []Slice{}
+	for _, dbSlice := range dbSlices {
+		slices = append(slices, Slice{
+			ID:        dbSlice.ID,
+			CreatedAt: dbSlice.CreatedAt,
+			StartedAt: dbSlice.StartedAt,
+		})
+	}
+	return slices
+}
+
+type SliceProject struct {
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	ProjectID uuid.UUID `json:"project_id"`
+	SliceID   uuid.UUID `json:"slice_id"`
+	Value     int32     `json:"value"`
+}
+
+func databaseSliceProjectToSliceProject(dbSliceProject database.SliceProject) SliceProject {
+	return SliceProject{
+		ID:        dbSliceProject.ID,
+		CreatedAt: dbSliceProject.CreatedAt,
+		ProjectID: dbSliceProject.ProjectID,
+		SliceID:   dbSliceProject.SliceID,
+		Value:     dbSliceProject.Value,
+	}
+}
+
+func databaseSliceProjectsToSliceProjects(dbSliceProjects []database.SliceProject) []SliceProject {
+	sliceProjects := []SliceProject{}
+	for _, dbSliceProject := range dbSliceProjects {
+		sliceProjects = append(sliceProjects, SliceProject{
+			ID:        dbSliceProject.ID,
+			CreatedAt: dbSliceProject.CreatedAt,
+			ProjectID: dbSliceProject.ProjectID,
+			SliceID:   dbSliceProject.SliceID,
+			Value:     dbSliceProject.Value,
+		})
+	}
+	return sliceProjects
+}

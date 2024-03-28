@@ -64,11 +64,12 @@ func main() {
 	v1Router.Post("/users", apiCfg.handlerCreateUser)
 	v1Router.Get("/users", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
 
-	// v1Router.Post("/projects", apiCfg.middlewareAuth(apiCfg.handlerCreateVote))
 	v1Router.Get("/projects", apiCfg.handlerGetProjects)
 
 	v1Router.Post("/votes", apiCfg.middlewareAuth(apiCfg.handlerCreateVote))
 	v1Router.Get("/votes", apiCfg.handlerGetVotes)
+
+	v1Router.Get("/slices", apiCfg.handlerGetSlices)
 
 	router.Mount("/v1", v1Router)
 
