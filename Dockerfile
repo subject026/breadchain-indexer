@@ -8,4 +8,6 @@ RUN go mod download
 
 RUN go build -o ./build/indexer
 
+RUN chmod +x ./build/indexer
+
 CMD ./build/indexer
