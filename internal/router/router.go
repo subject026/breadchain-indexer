@@ -1,47 +1,16 @@
-package main
+package router
 
 import (
-	"database/sql"
-	"log"
-	"net/http"
-	"os"
-
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
-	"github.com/joho/godotenv"
 	"github.com/subject026/breadchain-indexer/internal/database"
-
-	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
 	DB *database.Queries
 }
 
-func main() {
-
-	godotenv.Load(".env")
-
-	portString := os.Getenv(("PORT"))
-
-	if portString == "" {
-		log.Fatal("PORT environment variable not set")
-	}
-
-	dbURL := os.Getenv("DB_URL")
-	if dbURL == "" {
-		log.Fatal("DB_URL environment variable not set")
-	}
-
-	conn, err := sql.Open("postgres", dbURL)
-	if err != nil {
-		log.Println(err)
-		log.Fatal("Cant connect to database")
-	}
-
-	apiCfg := apiConfig{
-		DB: database.New(conn),
-	}
+func New(DB *database.Queries) *chi.Mux {
 
 	router := chi.NewRouter()
 
@@ -54,9 +23,11 @@ func main() {
 		MaxAge:           300,
 	}))
 
-	v1Router := chi.NewRouter()
+	apiCfg := apiConfig{
+		DB: DB,
+	}
 
-	log.Println("Starting server on port: ", portString)
+	v1Router := chi.NewRouter()
 
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerError)
@@ -73,16 +44,5 @@ func main() {
 
 	router.Mount("/v1", v1Router)
 
-	srv := &http.Server{
-		Handler: router,
-		Addr:    ":" + portString,
-	}
-
-	go startVoter(apiCfg.DB)
-
-	srvErr := srv.ListenAndServe()
-	if srvErr != nil {
-		log.Fatal(err)
-	}
-
+	return router
 }

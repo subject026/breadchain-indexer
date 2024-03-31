@@ -1,7 +1,6 @@
-package main
+package router
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -9,8 +8,6 @@ import (
 func (apiCfg apiConfig) handlerGetSlices(w http.ResponseWriter, r *http.Request) {
 
 	dbSlices, err := apiCfg.DB.GetSlices(r.Context())
-
-	fmt.Println("db slices length: ", dbSlices)
 
 	if err != nil {
 		log.Println(err)

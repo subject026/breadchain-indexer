@@ -1,4 +1,4 @@
-package main
+package router
 
 import (
 	"encoding/json"
@@ -12,10 +12,15 @@ import (
 	"github.com/subject026/breadchain-indexer/internal/database"
 )
 
+type VoteParams struct {
+	UserAddress    string `json:"userAddress"`
+	ProjectAddress string `json:"projectAddress"`
+	Value          string `json:"value"`
+}
+
 func (apiCfg *apiConfig) handlerCreateVote(w http.ResponseWriter, r *http.Request, user database.User) {
 	type parameters struct {
-		ProjectAddress string `json:"project_address"`
-		Value          string `json:"value"`
+		Votes []VoteParams `json:"votes"`
 	}
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
@@ -24,32 +29,39 @@ func (apiCfg *apiConfig) handlerCreateVote(w http.ResponseWriter, r *http.Reques
 		respondWithError(w, 400, fmt.Sprint("Error parsing JSON: ", err))
 		return
 	}
-	value, err := strconv.ParseInt(params.Value, 10, 32)
-	if err != nil {
-		respondWithError(w, 400, fmt.Sprint("Error parsing value: ", err))
-		return
+
+	for _, vote := range params.Votes {
+		value, err := strconv.ParseInt(vote.Value, 10, 32)
+		if err != nil {
+			respondWithError(w, 400, fmt.Sprint("Error parsing value: ", err))
+			return
+		}
+		dbProject, err := apiCfg.DB.GetProjectByAddress(r.Context(), vote.ProjectAddress)
+		if err != nil {
+			respondWithError(w, 400, fmt.Sprint("Error getting project: ", err))
+			return
+		}
+		dbUser, err := apiCfg.DB.GetUserByAddress(r.Context(), vote.UserAddress)
+		if err != nil {
+			respondWithError(w, 400, fmt.Sprint("Error getting user: ", err))
+			return
+		}
+
+		_, voteErr := apiCfg.DB.CreateVote(r.Context(), database.CreateVoteParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now(),
+			UserID:    dbUser.ID,
+			ProjectID: dbProject.ID,
+			Value:     int32(value),
+		})
+
+		if voteErr != nil {
+			log.Fatal(err)
+			return
+		}
 	}
 
-	project, err := apiCfg.DB.GetProjectByAddress(r.Context(), params.ProjectAddress)
-	if err != nil {
-		respondWithError(w, 400, fmt.Sprint("Error getting project: ", err))
-		return
-	}
-
-	vote, err := apiCfg.DB.CreateVote(r.Context(), database.CreateVoteParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UserID:    user.ID,
-		ProjectID: project.ID,
-		Value:     int32(value),
-	})
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
-	}
-
-	respondWithJSON(w, http.StatusCreated, databaseVoteToVote(vote))
+	respondWithJSON(w, http.StatusCreated, nil)
 }
 
 func (apiCfg apiConfig) handlerGetVotes(w http.ResponseWriter, r *http.Request) {

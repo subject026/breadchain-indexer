@@ -1,4 +1,4 @@
-package main
+package voter
 
 import (
 	"context"
@@ -19,7 +19,7 @@ type VoterState struct {
 	Users    []database.User
 }
 
-func startVoter(DB *database.Queries) {
+func Start(DB *database.Queries) {
 
 	VOTE_INTERVAL := os.Getenv("VOTE_INTERVAL")
 	if VOTE_INTERVAL == "" {
