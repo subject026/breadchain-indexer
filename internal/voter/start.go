@@ -55,7 +55,7 @@ func Start(DB *database.Queries) {
 			return
 		}
 
-		users, err := DB.GetUsers(mainCtx)
+		users, err := DB.GetTestUsers(mainCtx)
 		if err != nil {
 			log.Fatal(err)
 			return

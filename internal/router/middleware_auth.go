@@ -20,9 +20,10 @@ func (apiConfig *apiConfig) middlewareAuth(handler authedHandler) http.HandlerFu
 			respondWithError(w, 400, fmt.Sprint("Error parsing JSON: ", err))
 			return
 		}
-
+		fmt.Println("\naddress", address)
 		user, err := apiConfig.DB.GetUserByAddress(r.Context(), address)
 
+		fmt.Println("rr", err)
 		if err != nil {
 			respondWithError(w, 400, fmt.Sprint("Error getting user: ", err))
 			return

@@ -5,6 +5,10 @@ CREATE TABLE users (
     wallet_address TEXT NOT NULL
 );
 
+CREATE TABLE test_users (
+    user_id UUID NOT NULL UNIQUE REFERENCES users(id)
+);
+
 CREATE TABLE projects (
     id UUID PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
@@ -47,12 +51,17 @@ INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random():
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0x0a00Fb2e074Ffaaf6c561164C6458b5C448120FC');
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0xecb6ffaC05D8b4660b99B475B359FE454c77D153');
 
+INSERT INTO test_users ( user_id )
+SELECT  id
+FROM    users;
+
 INSERT INTO projects (id, created_at, updated_at, name, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'Crypto Commons Association', '0x09750ad360fdb7a2ee23669c4503cryptocommons');
 INSERT INTO projects (id, created_at, updated_at, name, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'LaborDAO', '0x09750ad360fdb7a2ee23669c4503labordao');
 INSERT INTO projects (id, created_at, updated_at, name, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'Symbiota', '0x09750ad360fdb7a2ee23669c4503symbiota');
 
 -- +goose Down
 DROP TABLE users CASCADE;
+DROP TABLE test_users CASCADE;
 DROP TABLE projects CASCADE;
 DROP TABLE votes CASCADE;
 DROP TABLE slices CASCADE;

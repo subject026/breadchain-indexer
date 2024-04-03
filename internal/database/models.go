@@ -32,6 +32,10 @@ type SliceProject struct {
 	Value     int32
 }
 
+type TestUser struct {
+	UserID uuid.UUID
+}
+
 type User struct {
 	ID            uuid.UUID
 	CreatedAt     time.Time
