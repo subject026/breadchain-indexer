@@ -10,7 +10,7 @@ CREATE TABLE projects (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
     name TEXT NOT NULL,
-    wallet_address TEXT NOT NULL DEFAULT '0x0000000000000000'
+    wallet_address TEXT NOT NULL
 );
 
 CREATE TABLE votes (
@@ -47,9 +47,9 @@ INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random():
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0x0a00Fb2e074Ffaaf6c561164C6458b5C448120FC');
 INSERT INTO users (id, created_at, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), '0xecb6ffaC05D8b4660b99B475B359FE454c77D153');
 
-INSERT INTO projects (id, created_at, updated_at, name) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'Crypto Commons Association');
-INSERT INTO projects (id, created_at, updated_at, name) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'LaborDAO');
-INSERT INTO projects (id, created_at, updated_at, name) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'Symbiota');
+INSERT INTO projects (id, created_at, updated_at, name, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'Crypto Commons Association', '0x09750ad360fdb7a2ee23669c4503cryptocommons');
+INSERT INTO projects (id, created_at, updated_at, name, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'LaborDAO', '0x09750ad360fdb7a2ee23669c4503labordao');
+INSERT INTO projects (id, created_at, updated_at, name, wallet_address) VALUES (uuid_in(md5(random()::text || random()::text)::cstring), NOW(), NOW(), 'Symbiota', '0x09750ad360fdb7a2ee23669c4503symbiota');
 
 -- +goose Down
 DROP TABLE users CASCADE;

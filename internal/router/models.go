@@ -22,34 +22,34 @@ func databaseUserToUser(dbUser database.User) User {
 }
 
 type Vote struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UserID    uuid.UUID `json:"user_id"`
-	ProjectID uuid.UUID `json:"project_id"`
-	Value     int32     `json:"value"`
+	ID            uuid.UUID `json:"id"`
+	CreatedAt     time.Time `json:"createdAt"`
+	WalletAddress string    `json:"walletAddress"`
+	ProjectID     uuid.UUID `json:"projectId"`
+	Value         int32     `json:"value"`
 }
 
-func databaseVoteToVote(dbVote database.Vote) Vote {
+func databaseVoteToVote(dbVote database.GetVotesInRangeRow) Vote {
 	return Vote{
-		ID:        dbVote.ID,
-		CreatedAt: dbVote.CreatedAt,
-		UserID:    dbVote.UserID,
-		ProjectID: dbVote.ProjectID,
-		Value:     dbVote.Value,
+		ID:            dbVote.ID,
+		CreatedAt:     dbVote.CreatedAt,
+		WalletAddress: dbVote.WalletAddress,
+		ProjectID:     dbVote.ProjectID,
+		Value:         dbVote.Value,
 	}
 }
 
 ///////
 
-func databaseVotesToVotes(dbVotes []database.Vote) []Vote {
+func databaseVotesToVotes(dbVotes []database.GetVotesInRangeRow) []Vote {
 	votes := []Vote{}
 	for _, dbVote := range dbVotes {
 		votes = append(votes, Vote{
-			ID:        dbVote.ID,
-			CreatedAt: dbVote.CreatedAt,
-			UserID:    dbVote.UserID,
-			ProjectID: dbVote.ProjectID,
-			Value:     dbVote.Value,
+			ID:            dbVote.ID,
+			CreatedAt:     dbVote.CreatedAt,
+			WalletAddress: dbVote.WalletAddress,
+			ProjectID:     dbVote.ProjectID,
+			Value:         dbVote.Value,
 		})
 	}
 	return votes

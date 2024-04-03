@@ -17,3 +17,4 @@ ORDER BY slices.created_at DESC;
 SELECT * FROM slices
 ORDER BY created_at DESC
 LIMIT 1;
+

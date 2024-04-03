@@ -137,11 +137,10 @@ func Start(DB *database.Queries) {
 		fmt.Println("Slice created!!!: ", slice.ID)
 
 		for _, project := range projects {
-			projectVotes := filter(votes, func(vote database.Vote) bool {
+			projectVotes := filter(votes, func(vote database.GetVotesInRangeRow) bool {
 				return vote.ProjectID == project.ID
 			})
 
-			fmt.Println("projectVotes: ", projectVotes)
 			value := int32(0)
 
 			for _, vote := range projectVotes {

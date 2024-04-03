@@ -80,7 +80,9 @@ func (q *Queries) GetVotes(ctx context.Context) ([]Vote, error) {
 }
 
 const getVotesInRange = `-- name: GetVotesInRange :many
-SELECT id, created_at, user_id, project_id, value FROM votes WHERE created_at > $1 AND created_at < $2 ORDER BY created_at DESC
+SELECT votes.id, votes.created_at, votes.project_id, votes.value, users.wallet_address FROM votes
+INNER JOIN users ON votes.user_id = users.id
+WHERE votes.created_at > $1 AND votes.created_at < $2 ORDER BY votes.created_at DESC
 `
 
 type GetVotesInRangeParams struct {
@@ -88,21 +90,29 @@ type GetVotesInRangeParams struct {
 	CreatedAt_2 time.Time
 }
 
-func (q *Queries) GetVotesInRange(ctx context.Context, arg GetVotesInRangeParams) ([]Vote, error) {
+type GetVotesInRangeRow struct {
+	ID            uuid.UUID
+	CreatedAt     time.Time
+	ProjectID     uuid.UUID
+	Value         int32
+	WalletAddress string
+}
+
+func (q *Queries) GetVotesInRange(ctx context.Context, arg GetVotesInRangeParams) ([]GetVotesInRangeRow, error) {
 	rows, err := q.db.QueryContext(ctx, getVotesInRange, arg.CreatedAt, arg.CreatedAt_2)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Vote
+	var items []GetVotesInRangeRow
 	for rows.Next() {
-		var i Vote
+		var i GetVotesInRangeRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
-			&i.UserID,
 			&i.ProjectID,
 			&i.Value,
+			&i.WalletAddress,
 		); err != nil {
 			return nil, err
 		}
