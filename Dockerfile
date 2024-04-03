@@ -6,7 +6,7 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o ./build/indexer
+RUN go build -o ./build/indexer ./cmd/main/main.go
 
 RUN chmod +x ./build/indexer
 
